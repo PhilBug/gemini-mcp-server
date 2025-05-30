@@ -37,10 +37,8 @@ def main():
         run_kwargs["port"] = 8000
         run_kwargs["path"] = "/mcp"
         run_kwargs["middleware"] = custom_middleware
-        # run_kwargs["log_level"] = "info" # uvicorn's log_level can be configured here if needed
     elif args.transport == "stdio":
         os.environ["MCP_TRANSPORT_MODE"] = "stdio"
-        # For stdio, host, port, path, and middleware are not applicable
 
     mcp.run(**run_kwargs)
 

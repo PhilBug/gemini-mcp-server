@@ -26,7 +26,7 @@ A Model Context Protocol server that provides web search capabilities powered by
 ## Installation
 
 ```bash
-pip install git+https://github.com/philschmid/gemini-mcp-example.git
+pip install git+https://github.com/philschmid/gemini-mcp-server.git
 ```
 
 ## Authentication
