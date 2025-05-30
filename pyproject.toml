@@ -1,7 +1,7 @@
 [project]
-name = "google-mail-mcp"
+name = "gemini-mcp"
 version = "0.1.0"
-description = "A simple Google Mail MCP server demonstrating OAuth authentication"
+description = "A simple Gemini MCP server"
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [{ name = "Philipp Schmid" }]
