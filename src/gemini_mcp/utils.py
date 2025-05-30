@@ -20,7 +20,6 @@ def process_grounding_to_structured_citations(
     of structured CitationEntry objects.
     Based on the user's provided example script.
     """
-    print(grounding_metadata)
     citations = []
     for support in grounding_metadata.grounding_supports:
         obj = {

@@ -34,7 +34,6 @@ async def search_web(
     genai_client = await get_gemini_client()
     current_date_str = get_current_date()
 
-    print(f"Searching web for query: {query}")
     response = await genai_client.aio.models.generate_content(
         model="gemini-2.0-flash",
         contents=web_search_prompt.format(
@@ -59,8 +58,11 @@ async def search_web(
             web_search_queries_used = list(
                 response.candidates[0].grounding_metadata.web_search_queries
             )
-    return {
-        "text": response.text,
-        "web_search_queries": web_search_queries_used,
-        "citations": structured_citations,
-    }
+    return response.text
+
+
+# {
+#         "text":
+#         "web_search_queries": web_search_queries_used,
+#         "citations": structured_citations,
+#     }
