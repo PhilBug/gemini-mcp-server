@@ -6,8 +6,7 @@ A Model Context Protocol server that provides access to Google's Gemini API. Thi
 - **web_search** - Performs a web search using Gemini and returns synthesized results with citations
   - `query` (string, required): The search query to execute
   - `include_citations` (boolean, optional): Whether to include citations in the response. Default is `False`.
-
-**use_gemini** - Delegates a task to a specified Gemini model (Pro or Flash).
+- **use_gemini** - Delegates a task to a specified Gemini 2.5 model (Pro or Flash).
   - `prompt` (string, required): The prompt or task for Gemini.
   - `model` (string, optional): The Gemini model to use. Default is `gemini-2.5-flash-preview-05-20`.
 
@@ -47,8 +46,8 @@ To deploy the server, run the following command from your terminal, replacing `[
 
 ```bash
 # Set your project ID and region
-export PROJECT_ID=[PROJECT-ID]
-export REGION=[REGION]
+export PROJECT_ID=remote-mcp-tests-462716
+export REGION=europe-west1
 export SERVICE_NAME=gemini-mcp-server
 
 # Authenticate with Google Cloud
