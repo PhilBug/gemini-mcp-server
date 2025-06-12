@@ -136,6 +136,15 @@ With `include_citations` set to `True`:
 }
 ```
 
+## Testing
+
+To run the tests, run the following command from the root directory:
+
+Note: You need to set the `GEMINI_API_KEY` environment variable to run the tests.
+
+```bash
+pytest
+```
 
 ## License
 
