@@ -1,8 +1,8 @@
-from fastmcp import Context
 from pydantic import Field
-from starlette.responses import JSONResponse
-from typing import Annotated, List
+from typing import Annotated, Literal, Union
 from .utils import (
+    TextToolOutput,
+    WebSearchToolOutput,
     process_grounding_to_structured_citations,
     get_current_date,
     get_gemini_client,
@@ -23,13 +23,25 @@ Research Topic:
 """
 
 
-async def search_web(
+async def web_search(
     query: Annotated[
         str,
-        Field(description="The query to search."),
+        Field(
+            description="The query used to search the web. This query will be potential composed and optimized by the tool."
+        ),
     ],
-) -> JSONResponse:  # Return type is now StructuredToolOutput
-    """Tool to search the web using Google Search API - performs real-time web searches."""
+    include_citations: Annotated[
+        bool,
+        Field(
+            description="""Whether to include citations and web search queries used during the search in the response. 
+            This leads to a bigger response object. Make sure to only use this if the user asks for it or the response would benefit from it. 
+            Default is False.""",
+        ),
+    ] = False,
+) -> Union[WebSearchToolOutput, TextToolOutput]:
+    """Use this tool to perform a Google web search on a given prompt to access the real-time and up-to-date information.
+    It synthesizes findings from multiple, automatically generated Google searches into a coherent, verifiable summary.
+    """
 
     genai_client = await get_gemini_client()
     current_date_str = get_current_date()
@@ -58,11 +70,47 @@ async def search_web(
             web_search_queries_used = list(
                 response.candidates[0].grounding_metadata.web_search_queries
             )
-    return response.text
+
+    if include_citations:
+        return {
+            "text": response.text,
+            "web_search_queries": web_search_queries_used,
+            "citations": structured_citations,
+        }
+    else:
+        return {
+            "text": response.text,
+        }
 
 
-# {
-#         "text":
-#         "web_search_queries": web_search_queries_used,
-#         "citations": structured_citations,
-#     }
+async def use_gemini(
+    prompt: Annotated[
+        str,
+        Field(
+            description="The prompt or task for Gemini. This can be a question, a request for planning, reflection, or any other support."
+        ),
+    ],
+    model: Annotated[
+        Literal["gemini-2.5-pro-preview-05-06", "gemini-2.5-flash-preview-05-20"],
+        Field(
+            description="The Gemini model to use. Use 'gemini-2.5-pro-preview-05-06' for complex tasks needing advanced reasoning and 'gemini-2.5-flash-preview-05-20' for speed and cost-efficiency."
+        ),
+    ] = "gemini-2.5-flash-preview-05-20",
+) -> TextToolOutput:
+    """Use this tool to delegate a task to a specified Gemini model (Pro or Flash).
+
+    This tool can be used for a wide range of tasks, including complex reasoning,
+    content generation, summarization, and planning. It acts as a powerful
+    assistant for requests that require advanced AI capabilities.
+    """
+
+    genai_client = await get_gemini_client()
+
+    response = await genai_client.aio.models.generate_content(
+        model=model,
+        contents=prompt,
+    )
+
+    return {
+        "text": response.text,
+    }

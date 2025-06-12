@@ -5,16 +5,18 @@ from gemini_mcp import tools
 import argparse
 import os
 from gemini_mcp.auth import BearerTokenAuthMiddleware
+from fastmcp.tools import FunctionTool
 
 mcp = FastMCP(
-    name="Gemini Web Search",
+    name="gemini-mcp",
+    instructions="A tool that uses Gemini API models and features to help you build AI Agents.",
 )
 
 # Dynamically add all async functions from the tools module
 for name, func in inspect.getmembers(tools):
     if inspect.isasyncgenfunction(func) or inspect.iscoroutinefunction(func):
         if hasattr(func, "__module__") and func.__module__ == tools.__name__:
-            mcp.add_tool(fn=func, name=name)
+            mcp.add_tool(tool=FunctionTool.from_function(func, name=name))
 
 
 def main():

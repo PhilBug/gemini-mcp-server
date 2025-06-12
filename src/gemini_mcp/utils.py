@@ -1,10 +1,31 @@
-from pydantic import BaseModel, Field
-from typing import Optional, List, Any
+from pydantic import BaseModel
+from typing import List, Any
 import datetime
 import os
-from fastmcp import Context
 from fastmcp.server.dependencies import get_http_request
 from starlette.requests import Request
+
+
+class Source(BaseModel):
+    title: str
+    uri: str
+
+
+class CitationEntry(BaseModel):
+    text: str
+    start_index: int
+    end_index: int
+    sources: List[Source]
+
+
+class WebSearchToolOutput(BaseModel):
+    text: str
+    web_search_queries: List[str]
+    citations: List[CitationEntry]
+
+
+class TextToolOutput(BaseModel):
+    text: str
 
 
 def get_current_date() -> str:
@@ -92,7 +113,7 @@ async def get_gemini_client():
     try:
         from google.genai import Client
     except ImportError:
-        raise ImportError("google-generativeai library not found. Please install it.")
+        raise ImportError("google-genai library not found. Please install it.")
 
     genai_client = Client(api_key=api_key_to_use)
     return genai_client
