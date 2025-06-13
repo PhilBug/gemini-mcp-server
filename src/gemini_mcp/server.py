@@ -58,11 +58,11 @@ async def landing_page(request: Request):
         "",
         "",
         "",
-        "Remote MCP Server for Google Gemini 2.5 and Google Search",
+        "Remote MCP Server for Google Gemini 2.5 and Google Search (Tool)",
         "",
         f"Connect to: `{connect_url}`",
         "",
-        "Powered by <a href='https://ai.studio' target='_blank'>https://ai.studio</a> and Google Gemini",
+        "Powered through <a href='https://ai.studio' target='_blank'>https://ai.studio</a> and Google Gemini",
     ]
 
     response_lines = []
