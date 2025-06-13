@@ -2,6 +2,9 @@
 
 A Model Context Protocol server that provides access to Google's Gemini API. This server enables LLMs to perform intelligent web searches, generate content, and access other Gemini features.
 
+> [!NOTE]  
+> The MCP server is currently available under `https://gemini-mcp-server-231532712093.europe-west1.run.app/mcp/`. It is deployed to Google Cloud Run and can be authenticated using an AI Studio API key. see [examples/test_remote.py](examples/test_remote.py) for an example on how to use the server with the `google-genai` client.
+
 **Available Tools:**
 - **web_search** - Performs a web search using Gemini and returns synthesized results with citations
   - `query` (string, required): The search query to execute
@@ -36,7 +39,7 @@ GEMINI_API_KEY="your_gemini_api_key_here" gemini-mcp --transport stdio
 gemini-mcp --transport streamable-http
 ```
 
-The server will start on `http://0.0.0.0:8000/mcp`
+The server will start on `http://0.0.0.0:8000/mcp/`
 
 ## Deployment
 
@@ -46,7 +49,7 @@ To deploy the server, run the following command from your terminal, replacing `[
 
 ```bash
 # Set your project ID and region
-export PROJECT_ID=remote-mcp-tests-462716
+export PROJECT_ID=remote-mcp-test-462811
 export REGION=europe-west1
 export SERVICE_NAME=gemini-mcp-server
 
@@ -61,10 +64,19 @@ gcloud services enable run.googleapis.com artifactregistry.googleapis.com cloudb
 gcloud run deploy $SERVICE_NAME \
   --source . \
   --region $REGION \
+  --port 8000 \
   --allow-unauthenticated
 ```
 
 The command will build the Docker image, push it to Google Artifact Registry, and deploy it to Cloud Run. After the deployment is complete, you will get a URL for your service. We will allow unauthenticated access to the service this means that anyone with the URL can send requests to the server, which it self is protected by an Authorization header. If you want to secure the service you can follow the instructions in the [Cloud Run documentation](https://cloud.google.com/run/docs/authenticating/service-to-service).
+
+**cleanup**
+
+```bash
+SERVICE_NAME=gemini-mcp-server
+REGION=europe-west1
+gcloud run services delete $SERVICE_NAME --region $REGION
+```
 
 ## Usage Examples
 
@@ -83,6 +95,30 @@ Add to your `mcpServers` configuration:
     }
   }
 }
+```
+
+**HTTP Mode:**
+```json
+{
+  "mcpServers": {
+    "gemini-mcp": {
+      "url": "https://remote-mcp-test.com/mcp/", // replace with your remote mcp server url
+      "headers": { "Authorization": "Bearer YOUR_KEY" } // replace with your AI Studio API key
+    }
+  }
+}
+```
+
+or check out the example in the [examples/test_remote.py](examples/test_remote.py) file.
+
+```python
+from mcp.client.streamable_http import streamablehttp_client
+
+remote_url = "https://remote-mcp-test.com/mcp/" # replace with your remote mcp server url
+
+async with streamablehttp_client(
+    remote_url, headers={"Authorization": f"Bearer {api_key}"}
+) as (read, write, _):
 ```
 
 ### With MCP Inspector

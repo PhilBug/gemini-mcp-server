@@ -13,7 +13,9 @@ api_key = os.environ.get("GEMINI_API_KEY")
 
 # Create Gemini instance LLM class
 client = genai.Client(api_key=api_key)
-remote_url = "http://localhost:8000/mcp"
+
+# remote_url = "http://localhost:8000/mcp"
+remote_url = "https://gemini-mcp-server-231532712093.europe-west1.run.app/mcp/"
 
 
 async def run():
