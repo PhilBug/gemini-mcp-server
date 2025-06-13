@@ -1,9 +1,9 @@
-# Gemini MCP Server
-
-A Model Context Protocol server that provides access to Google's Gemini API. This server enables LLMs to perform intelligent web searches, generate content, and access other Gemini features.
-
 > [!NOTE]  
 > The MCP server is currently available under `https://gemini-mcp-server-231532712093.europe-west1.run.app/mcp/`. It is deployed to Google Cloud Run and can be authenticated using an AI Studio API key. see [examples/test_remote.py](examples/test_remote.py) for an example on how to use the server with the `google-genai` client.
+
+# Gemini MCP Server
+
+A Model Context Protocol server that provides access to Google's Gemini API. This server enables LLMs to perform intelligent web searches, generate content, and access other Gemini features. It supports both STDIO and streamable-http transport modes and can be run locally or remotely. If you use STDIO mode it will try to use the `GEMINI_API_KEY` environment variable. If you use streamable-http mode it will try to use the Bearer token in the Authorization header.
 
 **Available Tools:**
 - **web_search** - Performs a web search using Gemini and returns synthesized results with citations
