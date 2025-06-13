@@ -8,6 +8,9 @@ class BearerTokenAuthMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
 
     async def dispatch(self, request: Request, call_next) -> Response:
+        # Exclude the root path from authentication
+        if request.url.path == "/":
+            return await call_next(request)
         # Check if the header is missing
         auth_header = request.headers.get("Authorization")
         if not auth_header:
