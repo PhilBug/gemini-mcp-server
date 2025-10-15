@@ -6,11 +6,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 authors = [{ name = "Philipp Schmid", email = "philschmid@google.com" }]
 license = { text = "MIT" }
-dependencies = [
-    "mcp",
-    "fastmcp",
-    "google-genai",
-]
+dependencies = ["mcp", "fastmcp", "google-genai"]
 
 [project.urls]
 Homepage = "https://github.com/philschmid/gemini-mcp-server"
@@ -38,3 +34,4 @@ packages = ["src/gemini_mcp"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
+filterwarnings = ["ignore:.*_UnionGenericAlias.*:DeprecationWarning"]

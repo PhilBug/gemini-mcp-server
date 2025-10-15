@@ -41,6 +41,17 @@ def process_grounding_to_structured_citations(
     of structured CitationEntry objects.
     Based on the user's provided example script.
     """
+    # Return empty citations if grounding_metadata is None
+    if grounding_metadata is None:
+        return []
+
+    # Return empty citations if grounding_supports attribute doesn't exist or is None/empty
+    if (
+        not hasattr(grounding_metadata, "grounding_supports")
+        or not grounding_metadata.grounding_supports
+    ):
+        return []
+
     citations = []
     for support in grounding_metadata.grounding_supports:
         obj = {
@@ -80,7 +91,6 @@ async def get_gemini_client():
     if transport_mode == "stdio":
         api_key_to_use = os.getenv("GEMINI_API_KEY")
         if not api_key_to_use:
-
             raise ValueError(
                 "Authentication failed. GEMINI_API_KEY not found for stdio mode."
             )
@@ -89,14 +99,12 @@ async def get_gemini_client():
         try:
             request_starlette: Request = get_http_request()
         except RuntimeError:
-
             raise ValueError(
                 "Tool must be called via an HTTP request for streamable-http mode."
             )
 
         bearer_token = getattr(request_starlette.state, "bearer_token", None)
         if not bearer_token:
-
             raise ValueError(
                 "Authentication failed in streamable-http mode. Bearer token not found."
             )

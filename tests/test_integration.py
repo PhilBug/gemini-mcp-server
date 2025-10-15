@@ -23,8 +23,8 @@ async def test_web_search_integration(mcp_stdio_server: FastMCP):
     query = "What is the latest news on Gemini AI?"
     async with Client(mcp_stdio_server) as client:
         result = await client.call_tool("web_search", {"query": query})
-        assert isinstance(result[0].text, str)
-        assert len(result[0].text) > 0
+        assert isinstance(result.content[0].text, str)
+        assert len(result.content[0].text) > 0
 
 
 @pytest.mark.asyncio
@@ -35,5 +35,5 @@ async def test_use_gemini_integration(mcp_stdio_server: FastMCP):
     prompt = "What is 1 + 1?"
     async with Client(mcp_stdio_server) as client:
         result = await client.call_tool("use_gemini", {"prompt": prompt})
-        assert isinstance(result[0].text, str)
-        assert "2" in result[0].text
+        assert isinstance(result.content[0].text, str)
+        assert "2" in result.content[0].text

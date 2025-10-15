@@ -2,7 +2,6 @@
 # requires Python 3.13+
 import os
 import asyncio
-import subprocess
 from google import genai
 from mcp import ClientSession
 from mcp.client.streamable_http import streamablehttp_client
@@ -31,7 +30,7 @@ async def run():
             )
             print("Agent is ready. Type 'exit' to quit.")
             chat = client.aio.chats.create(
-                model="gemini-2.5-flash-preview-05-20", config=config
+                model="gemini-flash-latest", config=config
             )
             while True:
                 user_input = input("You: ")

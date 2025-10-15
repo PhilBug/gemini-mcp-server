@@ -6,18 +6,18 @@
 A Model Context Protocol server that provides access to Google's Gemini API. This server enables LLMs to perform intelligent web searches, generate content, and access other Gemini features. It supports both STDIO and streamable-http transport modes and can be run locally or remotely. If you use STDIO mode it will try to use the `GEMINI_API_KEY` environment variable. If you use streamable-http mode it will try to use the Bearer token in the Authorization header.
 
 **Available Tools:**
-- **web_search** - Performs a web search using Gemini and returns synthesized results with citations
+
+- **web_search** - Performs a web search using the configurable Gemini web search model and returns synthesized results with citations
   - `query` (string, required): The search query to execute
   - `include_citations` (boolean, optional): Whether to include citations in the response. Default is `False`.
-- **use_gemini** - Delegates a task to a specified Gemini 2.5 model (Pro or Flash).
+- **use_gemini** - Delegates a task to a specified Gemini model (Pro or Flash).
   - `prompt` (string, required): The prompt or task for Gemini.
-  - `model` (string, optional): The Gemini model to use. Default is `gemini-2.5-flash-preview-05-20`.
-
+  - `model` (string, optional): The Gemini model to use. Uses the configured default model if not specified.
 
 ## Installation
 
 ```bash
-pip install git+https://github.com/philschmid/gemini-mcp-server.git
+pip install git+https://github.com/philbug/gemini-mcp-server.git
 ```
 
 ## Authentication
@@ -25,11 +25,66 @@ pip install git+https://github.com/philschmid/gemini-mcp-server.git
 - **STDIO mode**: Uses `GEMINI_API_KEY` environment variable
 - **HTTP mode**: Requires Bearer token in Authorization header
 
+## Configuration
+
+The Gemini MCP Server supports configurable models for different use cases. You can customize which Gemini models are used for specific tasks by setting environment variables.
+
+### Model Configuration
+
+The server supports three configurable model types:
+
+1. **Web Search Model**: Used for web search functionality
+2. **Default Model**: Used for general tasks when no specific model is requested
+3. **Advanced Model**: Used for complex tasks requiring advanced reasoning
+
+### Environment Variables
+
+| Variable | Default Value | Description |
+|----------|---------------|-------------|
+| `GEMINI_WEB_SEARCH_MODEL` | `gemini-flash-lite-latest` | Model to use for web search functionality |
+| `GEMINI_DEFAULT_MODEL` | `gemini-flash-latest` | Default model for general use |
+| `GEMINI_ADVANCED_MODEL` | `gemini-2.5-pro` | Advanced model for complex tasks |
+
+### Configuration Examples
+
+Claude Code example:
+
+```json
+    "gemini-search": {
+        "command": "uv",
+        "args": [
+            "--directory",
+            "/home/{your cloned repo path}",
+            "run",
+            "python3",
+            "-m",
+            "gemini_mcp.server",
+            "--transport",
+            "stdio"
+        ],
+        "env": {
+            "GEMINI_API_KEY": "your_api_key",
+            "GEMINI_WEB_SEARCH_MODEL": "gemini-flash-latest",
+            "GEMINI_DEFAULT_MODEL": "gemini-flash-lite-latest",
+            "GEMINI_ADVANCED_MODEL": "gemini-flash-latest"
+        }
+    },
+```
+
+### Citation Processing
+
+The server includes improved handling of citation metadata. It now properly processes cases where grounding metadata might be None, ensuring more reliable citation generation and preventing errors during web search operations.
+
+### Backward Compatibility
+
+The server maintains full backward compatibility with existing configurations. If you don't set these environment variables, the server will use the default values shown above.
+
 ### Running the Server
 
 #### STDIO Mode (Local/Direct Integration)
 
 ```bash
+# Basic usage with default models
 GEMINI_API_KEY="your_gemini_api_key_here" gemini-mcp --transport stdio
 ```
 
@@ -43,7 +98,7 @@ The server will start on `http://0.0.0.0:8000/mcp/`
 
 ## Deployment
 
-You can deploy the Gemini MCP Server as Remote MCP Server to Google Cloud Run to make it available easily available to any client. 
+You can deploy the Gemini MCP Server as Remote MCP Server to Google Cloud Run to make it available easily available to any client.
 
 To deploy the server, run the following command from your terminal, replacing `[PROJECT-ID]` and `[REGION]` with your Google Cloud project ID and desired region:
 
@@ -62,15 +117,15 @@ gcloud services enable run.googleapis.com artifactregistry.googleapis.com cloudb
 
 # Deploy the service
 gcloud run deploy $SERVICE_NAME \
-  --source . \
-  --region $REGION \
-  --port 8000 \
-  --allow-unauthenticated
+    --source . \
+    --region $REGION \
+    --port 8000 \
+    --allow-unauthenticated
 ```
 
 The command will build the Docker image, push it to Google Artifact Registry, and deploy it to Cloud Run. After the deployment is complete, you will get a URL for your service. We will allow unauthenticated access to the service this means that anyone with the URL can send requests to the server, which it self is protected by an Authorization header. If you want to secure the service you can follow the instructions in the [Cloud Run documentation](https://cloud.google.com/run/docs/authenticating/service-to-service).
 
-**cleanup**
+### Cleanup
 
 ```bash
 SERVICE_NAME=gemini-mcp-server
@@ -83,6 +138,7 @@ gcloud run services delete $SERVICE_NAME --region $REGION
 Add to your `mcpServers` configuration:
 
 **STDIO Mode:**
+
 ```json
 {
   "mcpServers": {
@@ -90,7 +146,10 @@ Add to your `mcpServers` configuration:
       "command": "gemini-mcp",
       "args": ["--transport", "stdio"],
       "env": {
-        "GEMINI_API_KEY": "your_gemini_api_key_here"
+        "GEMINI_API_KEY": "your_gemini_api_key_here",
+        "GEMINI_WEB_SEARCH_MODEL": "gemini-flash-latest",
+        "GEMINI_DEFAULT_MODEL": "gemini-flash-lite-latest",
+        "GEMINI_ADVANCED_MODEL": "gemini-2.5-pro"
       }
     }
   }
@@ -98,6 +157,7 @@ Add to your `mcpServers` configuration:
 ```
 
 **HTTP Mode:**
+
 ```json
 {
   "mcpServers": {

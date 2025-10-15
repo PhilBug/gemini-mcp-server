@@ -1,11 +1,16 @@
 from pydantic import Field
-from typing import Annotated, Literal, Union
+from typing import Annotated, Union
 from .utils import (
     TextToolOutput,
     WebSearchToolOutput,
     process_grounding_to_structured_citations,
     get_current_date,
     get_gemini_client,
+)
+from .config import (
+    get_model_for_web_search,
+    get_default_model,
+    get_advanced_model,
 )
 
 
@@ -45,9 +50,10 @@ async def web_search(
 
     genai_client = await get_gemini_client()
     current_date_str = get_current_date()
+    web_search_model = get_model_for_web_search()
 
     response = await genai_client.aio.models.generate_content(
-        model="gemini-2.0-flash",
+        model=web_search_model,
         contents=web_search_prompt.format(
             query=query, current_date_str=current_date_str
         ),
@@ -91,11 +97,11 @@ async def use_gemini(
         ),
     ],
     model: Annotated[
-        Literal["gemini-2.5-pro-preview-06-05", "gemini-2.5-flash-preview-05-20"],
+        str,
         Field(
-            description="The Gemini model to use. Use 'gemini-2.5-pro-preview-06-05' for complex tasks needing advanced reasoning and 'gemini-2.5-flash-preview-05-20' for speed and cost-efficiency."
+            description="The Gemini model to use. Use 'gemini-2.5-pro' for complex tasks needing advanced reasoning, 'gemini-flash-latest' for speed and cost-efficiency, or 'gemini-flash-lite-latest' as the default. Any valid Gemini model name is supported."
         ),
-    ] = "gemini-2.5-flash-preview-05-20",
+    ] = None,
 ) -> TextToolOutput:
     """Use this tool to delegate a task to a specified Gemini model (Pro or Flash).
 
@@ -105,6 +111,15 @@ async def use_gemini(
     """
 
     genai_client = await get_gemini_client()
+
+    # Use configured model if not explicitly provided
+    if model is None:
+        model = get_default_model()
+    elif model == "gemini-2.5-pro":
+        model = get_advanced_model()
+    # For backward compatibility, keep the original default for gemini-flash-latest
+    elif model == "gemini-flash-latest":
+        model = get_default_model()
 
     response = await genai_client.aio.models.generate_content(
         model=model,
